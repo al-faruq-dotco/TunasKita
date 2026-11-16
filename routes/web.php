@@ -10,6 +10,7 @@ use App\Http\Controllers\Customer\ProductController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\WishlistController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -56,4 +57,9 @@ Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::resource('categories', AdminCategoryController::class)->except('show');
 });
