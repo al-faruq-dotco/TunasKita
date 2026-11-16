@@ -1,11 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-
-Route::get('/', function () {
-    return view('welcome');
-});
-// Salin blok ini ke routes/web.php (jangan mengganti route lain yang sudah ada).
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\HomeController;
@@ -14,6 +10,10 @@ use App\Http\Controllers\Customer\ProductController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\WishlistController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.process');
@@ -52,4 +52,8 @@ Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'password'])->name('profile.password');
 
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 });
