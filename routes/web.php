@@ -17,6 +17,9 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\CareGuideController as AdminCareGuideController;
+use App\Http\Controllers\Admin\DeliveryZoneController as AdminDeliveryZoneController;
+use App\Http\Controllers\Admin\GuideCategoryController as AdminGuideCategoryController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -77,4 +80,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('payments/{payment}/status', [AdminPaymentController::class, 'updateStatus'])->name('payments.status');
     Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
     Route::get('reports/export', [AdminReportController::class, 'export'])->name('reports.export');
+    Route::resource('delivery-zones', AdminDeliveryZoneController::class)->except('show');
+    Route::patch('delivery-zones/{delivery_zone}/toggle', [AdminDeliveryZoneController::class, 'toggle'])->name('delivery-zones.toggle');
+    Route::resource('guide-categories', AdminGuideCategoryController::class)->except('show');
+    Route::resource('guides', AdminCareGuideController::class)->except('show');
 });
