@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\SellerController as AdminSellerController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -66,4 +67,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('products/images/{image}/primary', [AdminProductController::class, 'setPrimary'])->name('products.images.primary');
     Route::resource('users', AdminUserController::class)->except('show');
     Route::resource('sellers', AdminSellerController::class)->except('show');
+    Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
 });
