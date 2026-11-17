@@ -36,7 +36,7 @@
         {{-- Sales chart --}}
         <div class="card p-5 lg:col-span-2">
             <div class="font-bold green">Grafik Penjualan</div>
-            <div class="text-xs muted">Total pesanan (tidak termasuk yang dibatalkan), 6 bulan terakhir</div>
+            <div class="text-xs muted">Pendapatan dari pembayaran lunas, 6 bulan terakhir</div>
             <div class="relative mt-4 h-64">
                 <canvas id="salesChart"></canvas>
             </div>
