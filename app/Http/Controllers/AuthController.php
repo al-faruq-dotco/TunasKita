@@ -22,20 +22,27 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            if (Auth::user()->role !== 'customer') {
-                Auth::logout();
+            $role = Auth::user()->role;
 
-                return back()->withErrors([
-                    'email' => 'Akun ini bukan akun Customer.',
-                ]);
+            if ($role === 'admin') {
+            return redirect()->route('admin.dashboard');
+            
             }
 
-            return redirect('/customer');
+            if ($role !== 'customer') {
+            Auth::logout();
+
+            return back()->withErrors([
+                'email' => 'Akun ini belum memiliki akses.',
+            ]);
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
+        return redirect('/customer');
+    }
+
+    return back()->withErrors([
+        'email' => 'Email atau password salah.',
+    ])->onlyInput('email');
     }
 
     public function logout(Request $request)
