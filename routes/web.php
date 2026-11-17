@@ -12,6 +12,8 @@ use App\Http\Controllers\Customer\WishlistController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\SellerController as AdminSellerController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -58,12 +60,10 @@ Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
-});
-
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('categories', AdminCategoryController::class)->except('show');
     Route::resource('products', AdminProductController::class)->except('show');
     Route::delete('products/images/{image}', [AdminProductController::class, 'destroyImage'])->name('products.images.destroy');
     Route::patch('products/images/{image}/primary', [AdminProductController::class, 'setPrimary'])->name('products.images.primary');
+    Route::resource('users', AdminUserController::class)->except('show');
+    Route::resource('sellers', AdminSellerController::class)->except('show');
 });
