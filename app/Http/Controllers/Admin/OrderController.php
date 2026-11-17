@@ -68,6 +68,15 @@ class OrderController extends Controller
                 return;
             }
 
+            if ($new === 'completed' && $order->payment && $order->payment->status !== 'paid') {
+                if ($order->payment->status === 'pending' && strtolower($order->payment->payment_method) === 'cod') {
+                    $order->payment->update(['status' => 'paid', 'paid_at' => now()]);
+                } else {
+                    $error = 'Pesanan belum bisa diselesaikan karena pembayaran belum lunas. Verifikasi pembayaran dulu.';
+                    return;
+                }
+            }
+
             if ($new === 'cancelled') {
                 foreach ($order->items as $item) {
                     Product::whereKey($item->product_id)->increment('stock', $item->quantity);
