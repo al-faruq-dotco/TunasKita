@@ -1,13 +1,16 @@
 @php
     $menu = [
-        ['label' => 'Dashboard',        'icon' => '🏠', 'route' => 'admin.dashboard',        'active' => 'admin.dashboard'],
-        ['label' => 'Data Pengguna',    'icon' => '👥', 'route' => 'admin.users.index',      'active' => 'admin.users.*'],
-        ['label' => 'Data Penjual',     'icon' => '🧑‍🌾', 'route' => 'admin.sellers.index',    'active' => 'admin.sellers.*'],
-        ['label' => 'Kategori Produk',  'icon' => '🏷️', 'route' => 'admin.categories.index', 'active' => 'admin.categories.*'],
-        ['label' => 'Data Produk',      'icon' => '📦', 'route' => 'admin.products.index',   'active' => 'admin.products.*'],
-        ['label' => 'Pesanan',          'icon' => '🧾', 'route' => 'admin.orders.index',     'active' => 'admin.orders.*'],
-        ['label' => 'Pembayaran',       'icon' => '💳', 'route' => 'admin.payments.index',   'active' => 'admin.payments.*'],
-        ['label' => 'Laporan',          'icon' => '📊', 'route' => 'admin.reports.index',    'active' => 'admin.reports.*'],
+        ['label' => 'Dashboard',         'icon' => '🏠', 'route' => 'admin.dashboard',              'active' => 'admin.dashboard'],
+        ['label' => 'Data Pengguna',     'icon' => '👥', 'route' => 'admin.users.index',            'active' => 'admin.users.*'],
+        ['label' => 'Data Penjual',      'icon' => '🧑‍🌾', 'route' => 'admin.sellers.index',         'active' => 'admin.sellers.*'],
+        ['label' => 'Kategori Produk',   'icon' => '🏷️', 'route' => 'admin.categories.index',       'active' => 'admin.categories.*'],
+        ['label' => 'Data Produk',       'icon' => '📦', 'route' => 'admin.products.index',         'active' => 'admin.products.*'],
+        ['label' => 'Pesanan',           'icon' => '🧾', 'route' => 'admin.orders.index',           'active' => 'admin.orders.*'],
+        ['label' => 'Pembayaran',        'icon' => '💳', 'route' => 'admin.payments.index',         'active' => 'admin.payments.*'],
+        ['label' => 'Zona Pengiriman',   'icon' => '🚚', 'route' => 'admin.delivery-zones.index',   'active' => 'admin.delivery-zones.*'],
+        ['label' => 'Panduan Perawatan', 'icon' => '🌿', 'route' => 'admin.guides.index',           'active' => 'admin.guides.*'],
+        ['label' => 'Kategori Panduan',  'icon' => '📚', 'route' => 'admin.guide-categories.index', 'active' => 'admin.guide-categories.*'],
+        ['label' => 'Laporan',           'icon' => '📊', 'route' => 'admin.reports.index',          'active' => 'admin.reports.*'],
     ];
 @endphp
 <!DOCTYPE html>
