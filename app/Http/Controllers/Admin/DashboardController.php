@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -35,17 +36,19 @@ class DashboardController extends Controller
             ],
         ];
 
-        // Sales for the last 6 months (cancelled orders excluded)
+        // Revenue for the last 6 months. Same rule as the Laporan page:
+        // only payments with status "paid", dated by when they were paid.
         $months = collect(range(5, 0))->map(fn ($i) => now()->startOfMonth()->subMonths($i));
 
-        $revenue = Order::where('status', '!=', 'cancelled')
-            ->where('created_at', '>=', $months->first())
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as ym, SUM(total_price) as total")
+        $revenue = DB::table('payments')
+            ->where('status', 'paid')
+            ->whereRaw('COALESCE(paid_at, created_at) >= ?', [$months->first()])
+            ->selectRaw("DATE_FORMAT(COALESCE(paid_at, created_at), '%Y-%m') as ym, SUM(amount) as total")
             ->groupBy('ym')
             ->pluck('total', 'ym');
 
         $salesChart = $months->map(fn ($m) => [
-            'label' => $m->locale('id')->isoFormat('MMM'),
+            'label' => $m->copy()->locale('id')->isoFormat('MMM'),
             'total' => (float) ($revenue[$m->format('Y-m')] ?? 0),
         ])->values();
 
@@ -56,10 +59,11 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Best sellers count only items from orders whose payment is paid.
         $bestSellers = Product::query()
             ->join('order_items', 'order_items.product_id', '=', 'products.id')
-            ->join('orders', 'orders.id', '=', 'order_items.order_id')
-            ->where('orders.status', '!=', 'cancelled')
+            ->join('payments', 'payments.order_id', '=', 'order_items.order_id')
+            ->where('payments.status', 'paid')
             ->select('products.id', 'products.name', 'products.price')
             ->selectRaw('SUM(order_items.quantity) as sold')
             ->groupBy('products.id', 'products.name', 'products.price')
