@@ -48,12 +48,8 @@
                     <tr class="border-t border-green-50">
                         <td class="px-5 py-3">
                             <div class="flex items-center gap-3">
-                                @if ($product->primaryImage)
-                                    <img src="{{ asset('storage/' . $product->primaryImage->image_path) }}"
-                                         class="h-12 w-12 rounded-lg object-cover" alt="">
-                                @else
-                                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-50">🍇</div>
-                                @endif
+                                <img src="{{ $product->thumbnail_url }}" alt="{{ $product->name }}"
+                                     class="h-12 w-12 rounded-lg bg-green-50 object-cover">
                                 <div>
                                     <div class="font-semibold green">{{ $product->name }}</div>
                                     <div class="text-xs muted">{{ $availability[$product->availability] ?? $product->availability }}</div>

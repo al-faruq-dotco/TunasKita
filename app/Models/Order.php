@@ -8,4 +8,6 @@ class Order extends Model {
  public function items(){return $this->hasMany(OrderItem::class);}
  public function shipment(){return $this->hasOne(Shipment::class);}
  public function payment(){return $this->hasOne(Payment::class);}
+ // Pesanan yang memuat minimal satu produk milik seller tertentu.
+ public function scopeForSeller($query,int $sellerId){return $query->whereHas('items.product',fn($q)=>$q->where('seller_id',$sellerId));}
 }

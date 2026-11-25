@@ -1,9 +1,11 @@
 <?php
+
 namespace Database\Seeders;
 
+use App\Models\User;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\User;
+use App\Models\ProductImage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -11,7 +13,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Buat akun Seller/Admin sebagai pemilik produk (wajib untuk kolom seller_id)
+        // 1. Akun Admin / Seller
         $seller = User::firstOrCreate(
             ['email' => 'admin@tunaskita.com'],
             [
@@ -23,7 +25,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 2. Buat Kategori Bibit Anggur
+        // 2. Kategori Bibit Anggur
         $catImpor = Category::firstOrCreate(
             ['name' => 'Anggur Impor'],
             ['description' => 'Varietas bibit anggur unggulan impor dengan rasa manis dan buah besar.']
@@ -39,7 +41,7 @@ class DatabaseSeeder extends Seeder
             ['description' => 'Varian anggur meja tanpa biji, renyah, dan praktis dikonsumsi.']
         );
 
-        // 3. Buat Daftar Produk Bibit Anggur
+        // 3. Produk Bibit Anggur + Gambar Otomatis ke Tabel product_images
         $products = [
             [
                 'category_id'  => $catImpor->id,
@@ -51,6 +53,7 @@ class DatabaseSeeder extends Seeder
                 'plant_size'   => '40 - 50 cm',
                 'availability' => 'available',
                 'status'       => 'active',
+                'image'        => 'https://images.unsplash.com/photo-1596363505729-4190a9506133?auto=format&fit=crop&w=800&q=80',
             ],
             [
                 'category_id'  => $catSeedless->id,
@@ -62,6 +65,7 @@ class DatabaseSeeder extends Seeder
                 'plant_size'   => '50 - 60 cm',
                 'availability' => 'available',
                 'status'       => 'active',
+                'image'        => 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=800&q=80',
             ],
             [
                 'category_id'  => $catImpor->id,
@@ -73,6 +77,7 @@ class DatabaseSeeder extends Seeder
                 'plant_size'   => '35 - 45 cm',
                 'availability' => 'available',
                 'status'       => 'active',
+                'image'        => 'https://images.unsplash.com/photo-1596363505729-4190a9506133?auto=format&fit=crop&w=800&q=80',
             ],
             [
                 'category_id'  => $catImpor->id,
@@ -84,6 +89,7 @@ class DatabaseSeeder extends Seeder
                 'plant_size'   => '45 - 55 cm',
                 'availability' => 'available',
                 'status'       => 'active',
+                'image'        => 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=800&q=80',
             ],
             [
                 'category_id'  => $catSeedless->id,
@@ -95,6 +101,7 @@ class DatabaseSeeder extends Seeder
                 'plant_size'   => '50 cm',
                 'availability' => 'available',
                 'status'       => 'active',
+                'image'        => 'https://images.unsplash.com/photo-1596363505729-4190a9506133?auto=format&fit=crop&w=800&q=80',
             ],
             [
                 'category_id'  => $catLokal->id,
@@ -106,16 +113,25 @@ class DatabaseSeeder extends Seeder
                 'plant_size'   => '30 - 40 cm',
                 'availability' => 'available',
                 'status'       => 'active',
+                'image'        => 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=800&q=80',
             ],
         ];
 
         foreach ($products as $item) {
-            Product::firstOrCreate(
+            $imagePath = $item['image'];
+            unset($item['image']);
+
+            $product = Product::firstOrCreate(
                 ['slug' => Str::slug($item['name'])],
                 array_merge($item, [
                     'seller_id' => $seller->id,
                     'slug'      => Str::slug($item['name']),
                 ])
+            );
+
+            ProductImage::updateOrCreate(
+                ['product_id' => $product->id, 'is_primary' => true],
+                ['image_path' => $imagePath]
             );
         }
     }

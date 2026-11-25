@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\ManagesProducts;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\OrderItem;
@@ -9,12 +10,12 @@ use App\Models\ProductImage;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
+    use ManagesProducts;
+
     public function index(Request $request)
     {
         $products = Product::query()
@@ -40,7 +41,8 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate($this->rules());
+        $data = $request->validate($this->rules(), $this->productMessages());
+        $this->ensureImageQuota($request);
 
         DB::transaction(function () use ($data, $request) {
             $product = Product::create(
@@ -61,7 +63,8 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $data = $request->validate($this->rules());
+        $data = $request->validate($this->rules(), $this->productMessages());
+        $this->ensureImageQuota($request, $product);
 
         DB::transaction(function () use ($data, $request, $product) {
             // The slug is intentionally left alone so storefront URLs stay stable.
@@ -78,32 +81,21 @@ class ProductController extends Controller
             return back()->with('error', 'Produk sudah pernah dipesan dan tidak bisa dihapus. Ubah statusnya menjadi nonaktif saja.');
         }
 
-        $paths = $product->images()->pluck('image_path')->all();
-        $product->delete();
-        Storage::disk('public')->delete($paths);
+        $this->deleteProductWithImages($product);
 
         return redirect()->route('admin.products.index')->with('success', 'Produk berhasil dihapus.');
     }
 
     public function destroyImage(ProductImage $image)
     {
-        $productId  = $image->product_id;
-        $wasPrimary = $image->is_primary;
-
-        Storage::disk('public')->delete($image->image_path);
-        $image->delete();
-
-        if ($wasPrimary) {
-            ProductImage::where('product_id', $productId)->orderBy('id')->first()?->update(['is_primary' => true]);
-        }
+        $this->removeImage($image);
 
         return back()->with('success', 'Gambar dihapus.');
     }
 
     public function setPrimary(ProductImage $image)
     {
-        ProductImage::where('product_id', $image->product_id)->update(['is_primary' => false]);
-        $image->update(['is_primary' => true]);
+        $this->makePrimary($image);
 
         return back()->with('success', 'Gambar utama diubah.');
     }
@@ -119,45 +111,8 @@ class ProductController extends Controller
 
     private function rules(): array
     {
-        return [
-            'category_id'  => ['required', 'exists:categories,id'],
-            'seller_id'    => ['required', Rule::exists('users', 'id')->where('role', 'seller')],
-            'name'         => ['required', 'string', 'max:150'],
-            'description'  => ['nullable', 'string'],
-            'price'        => ['required', 'numeric', 'min:0', 'max:9999999999'],
-            'stock'        => ['required', 'integer', 'min:0'],
-            'plant_age'    => ['nullable', 'string', 'max:80'],
-            'plant_size'   => ['nullable', 'string', 'max:80'],
-            'availability' => ['required', Rule::in(['available', 'out_of_stock', 'preorder'])],
-            'status'       => ['required', Rule::in(['active', 'inactive'])],
-            'images'       => ['nullable', 'array', 'max:5'],
-            'images.*'     => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        return $this->baseProductRules() + [
+            'seller_id' => ['required', Rule::exists('users', 'id')->where('role', 'seller')],
         ];
-    }
-
-    private function uniqueSlug(string $name): string
-    {
-        $base = Str::limit(Str::slug($name), 170, '') ?: 'produk';
-        $slug = $base;
-        $i = 2;
-
-        while (Product::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $i++;
-        }
-
-        return $slug;
-    }
-
-    private function saveImages(Product $product, Request $request): void
-    {
-        $hasPrimary = $product->images()->where('is_primary', true)->exists();
-
-        foreach ($request->file('images', []) as $file) {
-            $product->images()->create([
-                'image_path' => $file->store('products', 'public'),
-                'is_primary' => ! $hasPrimary,
-            ]);
-            $hasPrimary = true;
-        }
     }
 }

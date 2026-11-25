@@ -22,7 +22,7 @@
             <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                 @foreach ($product->images as $image)
                     <div class="rounded-xl border border-green-100 p-2">
-                        <img src="{{ asset('storage/' . $image->image_path) }}" class="h-32 w-full rounded-lg object-cover" alt="">
+                        <img src="{{ $image->url }}" class="h-32 w-full rounded-lg bg-green-50 object-cover" alt="Gambar {{ $product->name }}">
                         <div class="mt-2 flex flex-col gap-1 text-xs">
                             @if ($image->is_primary)
                                 <span class="rounded-full bg-green-100 px-2 py-1 text-center font-semibold text-green-800">Gambar utama</span>

@@ -13,5 +13,6 @@ class User extends Authenticatable {
  protected function casts(): array {return ['email_verified_at'=>'datetime','password'=>'hashed'];}
  public function cart(){return $this->hasOne(Cart::class);}
  public function orders(){return $this->hasMany(Order::class);}
+ public function products(){return $this->hasMany(Product::class,'seller_id');}
  public function wishlistItems(){return $this->hasMany(WishlistItem::class);}
 }

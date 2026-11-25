@@ -9,6 +9,9 @@ use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ProductController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\WishlistController;
+use App\Http\Controllers\Seller\DashboardController as SellerDashboardController;
+use App\Http\Controllers\Seller\OrderController as SellerOrderController;
+use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -84,4 +87,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('delivery-zones/{delivery_zone}/toggle', [AdminDeliveryZoneController::class, 'toggle'])->name('delivery-zones.toggle');
     Route::resource('guide-categories', AdminGuideCategoryController::class)->except('show');
     Route::resource('guides', AdminCareGuideController::class)->except('show');
+});
+
+Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(function () {
+    Route::get('/', [SellerDashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('products', SellerProductController::class)->except('show');
+    Route::delete('products/images/{image}', [SellerProductController::class, 'destroyImage'])->name('products.images.destroy');
+    Route::patch('products/images/{image}/primary', [SellerProductController::class, 'setPrimary'])->name('products.images.primary');
+
+    Route::get('orders', [SellerOrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{order}', [SellerOrderController::class, 'show'])->name('orders.show');
+    Route::patch('orders/{order}/status', [SellerOrderController::class, 'updateStatus'])->name('orders.status');
 });

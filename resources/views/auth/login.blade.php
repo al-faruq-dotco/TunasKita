@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Customer - TunasKita</title>
+    <title>Login - TunasKita</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,7 +59,7 @@
 
     <div class="login-box">
         <h2>🌱 TunasKita</h2>
-        <p style="text-align:center">Login Customer</p>
+        <p style="text-align:center">Masuk ke akun Anda</p>
 
         @if ($errors->any())
             <div class="error">

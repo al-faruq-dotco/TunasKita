@@ -53,7 +53,13 @@
                     <tbody>
                         @foreach ($order->items as $item)
                             <tr class="border-t border-green-50">
-                                <td class="px-5 py-3 font-semibold green">{{ $item->product->name ?? 'Produk dihapus' }}</td>
+                                <td class="px-5 py-3">
+                                    <div class="flex items-center gap-3">
+                                        <img src="{{ $item->product?->thumbnail_url ?? asset(\App\Models\Product::PLACEHOLDER_IMAGE) }}"
+                                             alt="" class="h-12 w-12 rounded-lg bg-green-50 object-cover">
+                                        <span class="font-semibold green">{{ $item->product->name ?? 'Produk dihapus' }}</span>
+                                    </div>
+                                </td>
                                 <td class="px-5 py-3">{{ $rp($item->price) }}</td>
                                 <td class="px-5 py-3">{{ $item->quantity }}</td>
                                 <td class="px-5 py-3 text-right">{{ $rp($item->subtotal) }}</td>

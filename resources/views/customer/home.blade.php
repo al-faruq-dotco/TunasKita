@@ -1,9 +1,71 @@
 @extends('customer.layouts.app')
-@section('title','Beranda | TunasKita')
+@section('title', 'Beranda | TunasKita')
 @section('content')
-<section class="rounded-3xl bg-[#edf1e5] p-7 md:p-12 grid md:grid-cols-2 gap-8 items-center"><div><span class="text-xs font-bold tracking-widest green">SELAMAT DATANG DI TUNASKITA</span><h1 class="text-4xl md:text-5xl font-extrabold green leading-tight mt-4">Hal kecil hari ini,<br>Tumbuh jadi bahagia.</h1><p class="mt-4 muted max-w-lg">Temukan berbagai bibit anggur unggulan untuk kebun rumah Anda. Mudah, aman, dan berkualitas.</p><div class="mt-7 flex gap-3"><a class="btn" href="{{ route('customer.products.index') }}">Belanja Sekarang →</a><a class="border border-green-800 rounded-full px-5 py-2.5 green" href="{{ route('customer.products.index') }}">Lihat Katalog</a></div></div><img class="rounded-3xl h-64 md:h-80 w-full object-cover" src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=1000" alt="Buah anggur"></section>
-<section class="grid grid-cols-2 md:grid-cols-4 gap-4 my-8">@foreach([['🌱','Bibit Berkualitas','Dipilih dari varietas unggulan'],['🚚','Pengiriman Aman','Packing rapi dan kokoh'],['♡','Garansi Hidup','Perlindungan jika tidak tumbuh'],['▣','Panduan Tanam','Tips perawatan tanaman']] as $v)<div class="card p-4 flex gap-3 items-center"><span class="text-2xl">{{ $v[0] }}</span><div><b class="text-sm">{{ $v[1] }}</b><p class="text-xs muted">{{ $v[2] }}</p></div></div>@endforeach</section>
-<section class="my-10"><div class="flex justify-between items-center mb-5"><h2 class="text-2xl font-bold green">Kategori Bibit Anggur</h2><a class="green text-sm font-semibold" href="{{ route('customer.products.index') }}">Lihat semua →</a></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4">@forelse($categories as $category)<a class="card p-5 hover:shadow-md" href="{{ route('customer.products.index',['category'=>$category->id]) }}"><div class="text-3xl">🍇</div><h3 class="font-bold mt-3">{{ $category->name }}</h3><p class="text-xs muted mt-1">{{ $category->products_count }} produk</p></a>@empty<p class="muted">Kategori belum tersedia.</p>@endforelse</div></section>
-<section class="my-10"><div class="flex justify-between items-center mb-5"><h2 class="text-2xl font-bold green">Produk Terbaru</h2><a class="green text-sm font-semibold" href="{{ route('customer.products.index') }}">Lihat semua →</a></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4">@forelse($products as $product)<article class="card"><a href="{{ route('customer.products.show',$product->slug) }}"><img class="w-full h-40 object-cover bg-green-50" src="{{ $product->primaryImage?asset('storage/'.$product->primaryImage->image_path):'https://images.unsplash.com/photo-1596363505729-4190a9506133?w=600' }}" alt="{{ $product->name }}"><div class="p-4"><p class="text-xs muted">{{ $product->category?->name ?? 'Bibit Anggur' }}</p><h3 class="font-bold mt-1">{{ $product->name }}</h3><p class="green font-extrabold mt-2">Rp {{ number_format($product->price,0,',','.') }}</p></div></a><div class="px-4 pb-4"><form method="POST" action="{{ route('customer.cart.store',$product) }}">@csrf<input type="hidden" name="quantity" value="1"><button class="btn w-full text-sm">+ Keranjang</button></form></div></article>@empty<p class="muted">Belum ada produk aktif.</p>@endforelse</div></section>
-<section id="panduan" class="rounded-3xl bg-[#e8eddf] p-8 my-12"><h2 class="text-2xl font-bold green">Rawat bibit, nikmati hasilnya.</h2><p class="muted mt-2">Temukan produk yang tepat dan mulai perjalanan berkebun anggur Anda.</p><a class="btn inline-block mt-5" href="{{ route('customer.products.index') }}">Jelajahi Bibit</a></section>
+    <section class="rounded-3xl bg-[#edf1e5] p-7 md:p-12 grid md:grid-cols-2 gap-8 items-center">
+        <div><span class="text-xs font-bold tracking-widest green">SELAMAT DATANG DI TUNASKITA</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold green leading-tight mt-4">Hal kecil hari ini,<br>Tumbuh jadi
+                bahagia.</h1>
+            <p class="mt-4 muted max-w-lg">Temukan berbagai bibit anggur unggulan untuk kebun rumah Anda. Mudah, aman, dan
+                berkualitas.</p>
+            <div class="mt-7 flex gap-3"><a class="btn" href="{{ route('customer.products.index') }}">Belanja Sekarang
+                    →</a><a class="border border-green-800 rounded-full px-5 py-2.5 green"
+                    href="{{ route('customer.products.index') }}">Lihat Katalog</a></div>
+        </div><img class="rounded-3xl h-64 md:h-80 w-full object-cover"
+            src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=1000" alt="Buah anggur">
+    </section>
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 my-8">
+        @foreach ([['🌱', 'Bibit Berkualitas', 'Dipilih dari varietas unggulan'], ['🚚', 'Pengiriman Aman', 'Packing rapi dan kokoh'], ['♡', 'Garansi Hidup', 'Perlindungan jika tidak tumbuh'], ['▣', 'Panduan Tanam', 'Tips perawatan tanaman']] as $v)
+            <div class="card p-4 flex gap-3 items-center"><span class="text-2xl">{{ $v[0] }}</span>
+                <div><b class="text-sm">{{ $v[1] }}</b>
+                    <p class="text-xs muted">{{ $v[2] }}</p>
+                </div>
+            </div>
+        @endforeach
+    </section>
+    <section class="my-10">
+        <div class="flex justify-between items-center mb-5">
+            <h2 class="text-2xl font-bold green">Kategori Bibit Anggur</h2><a class="green text-sm font-semibold"
+                href="{{ route('customer.products.index') }}">Lihat semua →</a>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @forelse($categories as $category)
+                <a class="card p-5 hover:shadow-md"
+                    href="{{ route('customer.products.index', ['category' => $category->id]) }}">
+                    <div class="text-3xl">🍇</div>
+                    <h3 class="font-bold mt-3">{{ $category->name }}</h3>
+                    <p class="text-xs muted mt-1">{{ $category->products_count }} produk</p>
+            </a>@empty<p class="muted">Kategori belum tersedia.</p>
+            @endforelse
+        </div>
+    </section>
+    <section class="my-10">
+        <div class="flex justify-between items-center mb-5">
+            <h2 class="text-2xl font-bold green">Produk Terbaru</h2><a class="green text-sm font-semibold"
+                href="{{ route('customer.products.index') }}">Lihat semua →</a>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @forelse($products as $product)
+                <article class="card"><a href="{{ route('customer.products.show', $product->slug) }}"><img
+                            class="w-full h-40 object-cover bg-green-50" src="{{ $product->thumbnail_url }}"
+                            alt="{{ $product->name }}">
+                        <div class="p-4">
+                            <p class="text-xs muted">{{ $product->category?->name ?? 'Bibit Anggur' }}</p>
+                            <h3 class="font-bold mt-1">{{ $product->name }}</h3>
+                            <p class="green font-extrabold mt-2">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                        </div>
+                    </a>
+                    <div class="px-4 pb-4">
+                        <form method="POST" action="{{ route('customer.cart.store', $product) }}">@csrf<input
+                                type="hidden" name="quantity" value="1"><button class="btn w-full text-sm">+
+                                Keranjang</button></form>
+                    </div>
+            </article>@empty<p class="muted">Belum ada produk aktif.</p>
+            @endforelse
+        </div>
+    </section>
+    <section id="panduan" class="rounded-3xl bg-[#e8eddf] p-8 my-12">
+        <h2 class="text-2xl font-bold green">Rawat bibit, nikmati hasilnya.</h2>
+        <p class="muted mt-2">Temukan produk yang tepat dan mulai perjalanan berkebun anggur Anda.</p><a
+            class="btn inline-block mt-5" href="{{ route('customer.products.index') }}">Jelajahi Bibit</a>
+    </section>
 @endsection

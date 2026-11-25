@@ -40,7 +40,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['user', 'items.product', 'shipment', 'payment']);
+        $order->load(['user', 'items.product.primaryImage', 'shipment', 'payment']);
 
         return view('admin.orders.show', [
             'order'   => $order,
