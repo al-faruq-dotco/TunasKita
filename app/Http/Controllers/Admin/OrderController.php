@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -12,12 +13,12 @@ class OrderController extends Controller
 {
     /** Allowed status changes. Completed and cancelled are final. */
     public const TRANSITIONS = [
-        'pending'    => ['confirmed', 'cancelled'],
-        'confirmed'  => ['processing', 'cancelled'],
+        'pending' => ['confirmed', 'cancelled'],
+        'confirmed' => ['processing', 'cancelled'],
         'processing' => ['shipped', 'cancelled'],
-        'shipped'    => ['completed'],
-        'completed'  => [],
-        'cancelled'  => [],
+        'shipped' => ['completed'],
+        'completed' => [],
+        'cancelled' => [],
     ];
 
     public function index(Request $request)
@@ -26,7 +27,7 @@ class OrderController extends Controller
             ->with(['user:id,name', 'payment:id,order_id,status'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('q'), function ($q) use ($request) {
-                $term = '%' . $request->q . '%';
+                $term = '%'.$request->q.'%';
                 $q->where(fn ($w) => $w
                     ->where('order_code', 'like', $term)
                     ->orWhereHas('user', fn ($u) => $u->where('name', 'like', $term)));
@@ -43,7 +44,7 @@ class OrderController extends Controller
         $order->load(['user', 'items.product.primaryImage', 'shipment', 'payment']);
 
         return view('admin.orders.show', [
-            'order'   => $order,
+            'order' => $order,
             'allowed' => self::TRANSITIONS[$order->status] ?? [],
         ]);
     }
@@ -51,8 +52,8 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $data = $request->validate([
-            'status'          => ['required', Rule::in(array_keys(self::TRANSITIONS))],
-            'courier'         => ['nullable', 'string', 'max:255'],
+            'status' => ['required', Rule::in(array_keys(self::TRANSITIONS))],
+            'courier' => ['nullable', 'string', 'max:255'],
             'tracking_number' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -64,15 +65,23 @@ class OrderController extends Controller
             $new = $data['status'];
 
             if (! in_array($new, self::TRANSITIONS[$order->status] ?? [], true)) {
-                $error = 'Status tidak bisa diubah dari ' . $order->status . ' ke ' . $new . '.';
+                $error = 'Status tidak bisa diubah dari '.$order->status.' ke '.$new.'.';
+
                 return;
             }
 
-            if ($new === 'completed' && $order->payment && $order->payment->status !== 'paid') {
+            if ($new === 'completed' && ! $order->payment) {
+                $error = 'Pesanan belum bisa diselesaikan karena data pembayaran tidak tersedia.';
+
+                return;
+            }
+
+            if ($new === 'completed' && $order->payment->status !== 'paid') {
                 if ($order->payment->status === 'pending' && strtolower($order->payment->payment_method) === 'cod') {
                     $order->payment->update(['status' => 'paid', 'paid_at' => now()]);
                 } else {
                     $error = 'Pesanan belum bisa diselesaikan karena pembayaran belum lunas. Verifikasi pembayaran dulu.';
+
                     return;
                 }
             }
@@ -92,16 +101,16 @@ class OrderController extends Controller
             if ($order->shipment) {
                 $shipmentUpdate = match ($new) {
                     'processing' => ['status' => 'processing'],
-                    'shipped'    => ['status' => 'shipped', 'shipped_at' => now()],
-                    'completed'  => ['status' => 'delivered', 'delivered_at' => now()],
-                    'cancelled'  => ['status' => 'cancelled'],
-                    default      => [],
+                    'shipped' => ['status' => 'shipped', 'shipped_at' => now()],
+                    'completed' => ['status' => 'delivered', 'delivered_at' => now()],
+                    'cancelled' => ['status' => 'cancelled'],
+                    default => [],
                 };
 
                 if ($new === 'shipped') {
                     // array_filter keeps any courier the customer already entered when these are left blank
                     $shipmentUpdate += array_filter([
-                        'courier'         => $data['courier'] ?? null,
+                        'courier' => $data['courier'] ?? null,
                         'tracking_number' => $data['tracking_number'] ?? null,
                     ]);
                 }
@@ -111,11 +120,11 @@ class OrderController extends Controller
 
                     DB::table('shipment_tracking')->insert([
                         'shipment_id' => $order->shipment->id,
-                        'status'      => $shipmentUpdate['status'],
+                        'status' => $shipmentUpdate['status'],
                         'description' => $this->trackingText($new),
-                        'tracked_at'  => now(),
-                        'created_at'  => now(),
-                        'updated_at'  => now(),
+                        'tracked_at' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
                 }
             }
@@ -134,10 +143,10 @@ class OrderController extends Controller
     {
         return match ($status) {
             'processing' => 'Pesanan sedang diproses penjual.',
-            'shipped'    => 'Pesanan telah dikirim.',
-            'completed'  => 'Pesanan telah diterima.',
-            'cancelled'  => 'Pengiriman dibatalkan.',
-            default      => '',
+            'shipped' => 'Pesanan telah dikirim.',
+            'completed' => 'Pesanan telah diterima.',
+            'cancelled' => 'Pengiriman dibatalkan.',
+            default => '',
         };
     }
 }

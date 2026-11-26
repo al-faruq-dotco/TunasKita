@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -16,7 +17,7 @@ class ReportController extends Controller
     {
         $request->validate([
             'from' => ['nullable', 'date'],
-            'to'   => ['nullable', 'date', 'after_or_equal:from'],
+            'to' => ['nullable', 'date', 'after_or_equal:from'],
         ]);
 
         [$from, $to] = $this->range($request);
@@ -25,7 +26,7 @@ class ReportController extends Controller
             return back()->withErrors(['from' => 'Rentang laporan maksimal 36 bulan.'])->withInput();
         }
 
-        $revenue   = (float) $this->paid($from, $to)->sum('payments.amount');
+        $revenue = (float) $this->paid($from, $to)->sum('payments.amount');
         $paidCount = $this->paid($from, $to)->count();
 
         $refunded = (float) DB::table('payments')
@@ -34,7 +35,7 @@ class ReportController extends Controller
             ->sum('amount');
 
         $byMonth = $this->paid($from, $to)
-            ->selectRaw('DATE_FORMAT(' . self::PAID_AT . ", '%Y-%m') as ym, SUM(payments.amount) as total, COUNT(*) as cnt")
+            ->selectRaw('DATE_FORMAT('.self::PAID_AT.", '%Y-%m') as ym, SUM(payments.amount) as total, COUNT(*) as cnt")
             ->groupBy('ym')
             ->get()
             ->keyBy('ym');
@@ -52,10 +53,13 @@ class ReportController extends Controller
         }
 
         $topProducts = DB::table('order_items')
-            ->join('payments', 'payments.order_id', '=', 'order_items.order_id')
             ->join('products', 'products.id', '=', 'order_items.product_id')
-            ->where('payments.status', 'paid')
-            ->whereRaw(self::PAID_AT . ' between ? and ?', [$from, $to])
+            ->whereExists(fn ($query) => $query
+                ->selectRaw('1')
+                ->from('payments')
+                ->whereColumn('payments.order_id', 'order_items.order_id')
+                ->where('payments.status', 'paid')
+                ->whereRaw(self::PAID_AT.' between ? and ?', [$from, $to]))
             ->selectRaw('products.id, products.name, SUM(order_items.quantity) as qty, SUM(order_items.subtotal) as revenue')
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('qty')
@@ -75,15 +79,15 @@ class ReportController extends Controller
             ->pluck('total', 'status');
 
         return view('admin.reports.index', [
-            'from'        => $from,
-            'to'          => $to,
-            'revenue'     => $revenue,
-            'paidCount'   => $paidCount,
-            'average'     => $paidCount ? $revenue / $paidCount : 0,
-            'refunded'    => $refunded,
-            'months'      => $months,
+            'from' => $from,
+            'to' => $to,
+            'revenue' => $revenue,
+            'paidCount' => $paidCount,
+            'average' => $paidCount ? $revenue / $paidCount : 0,
+            'refunded' => $refunded,
+            'months' => $months,
             'topProducts' => $topProducts,
-            'byMethod'    => $byMethod,
+            'byMethod' => $byMethod,
             'orderStatus' => $orderStatus,
         ]);
     }
@@ -92,11 +96,11 @@ class ReportController extends Controller
     {
         $request->validate([
             'from' => ['nullable', 'date'],
-            'to'   => ['nullable', 'date', 'after_or_equal:from'],
+            'to' => ['nullable', 'date', 'after_or_equal:from'],
         ]);
 
         [$from, $to] = $this->range($request);
-        $filename = 'laporan-pesanan-' . $from->format('Ymd') . '-' . $to->format('Ymd') . '.csv';
+        $filename = 'laporan-pesanan-'.$from->format('Ymd').'-'.$to->format('Ymd').'.csv';
 
         return response()->streamDownload(function () use ($from, $to) {
             $out = fopen('php://output', 'w');
@@ -128,7 +132,7 @@ class ReportController extends Controller
     private function range(Request $request): array
     {
         $from = Carbon::parse($request->input('from') ?: now()->subMonths(5)->startOfMonth())->startOfDay();
-        $to   = Carbon::parse($request->input('to') ?: now())->endOfDay();
+        $to = Carbon::parse($request->input('to') ?: now())->endOfDay();
 
         return [$from, $to];
     }
@@ -137,14 +141,14 @@ class ReportController extends Controller
     {
         return DB::table('payments')
             ->where('payments.status', 'paid')
-            ->whereRaw(self::PAID_AT . ' between ? and ?', [$from, $to]);
+            ->whereRaw(self::PAID_AT.' between ? and ?', [$from, $to]);
     }
 
     private function csvRow($handle, array $row): void
     {
         // Names are typed by customers. A leading = + - @ would run as a formula in Excel.
         $row = array_map(
-            fn ($v) => is_string($v) && preg_match('/^[=+\-@\t\r]/', $v) ? "'" . $v : $v,
+            fn ($v) => is_string($v) && preg_match('/^[=+\-@\t\r]/', $v) ? "'".$v : $v,
             $row
         );
 

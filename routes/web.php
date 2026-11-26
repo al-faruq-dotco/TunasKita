@@ -1,7 +1,17 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\CareGuideController as AdminCareGuideController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DeliveryZoneController as AdminDeliveryZoneController;
+use App\Http\Controllers\Admin\GuideCategoryController as AdminGuideCategoryController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\SellerController as AdminSellerController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\HomeController;
@@ -12,35 +22,21 @@ use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Seller\DashboardController as SellerDashboardController;
 use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
+
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\SellerController as AdminSellerController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
-use App\Http\Controllers\Admin\ReportController as AdminReportController;
-use App\Http\Controllers\Admin\CareGuideController as AdminCareGuideController;
-use App\Http\Controllers\Admin\DeliveryZoneController as AdminDeliveryZoneController;
-use App\Http\Controllers\Admin\GuideCategoryController as AdminGuideCategoryController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.process');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-// ROUTE LOGIN
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
 
 Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:10,1')
     ->name('login.process');
-// Tambahkan 2 baris ini untuk halaman & proses register:
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
-// ROUTE LOGOUT
+Route::post('/register', [AuthController::class, 'register'])->name('register.process');
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
@@ -67,6 +63,20 @@ Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->
 
 });
 
+Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(function () {
+    Route::get('/', [SellerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [SellerDashboardController::class, 'profile'])->name('profile');
+    Route::put('/profile', [SellerDashboardController::class, 'updateProfile'])->name('profile.update');
+
+    Route::resource('products', SellerProductController::class)->except('show');
+    Route::delete('products/images/{image}', [SellerProductController::class, 'destroyImage'])->name('products.images.destroy');
+    Route::patch('products/images/{image}/primary', [SellerProductController::class, 'setPrimary'])->name('products.images.primary');
+
+    Route::get('/orders', [SellerOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [SellerOrderController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{id}/status', [SellerOrderController::class, 'updateStatus'])->name('orders.status');
+});
+
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('categories', AdminCategoryController::class)->except('show');
@@ -87,16 +97,4 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('delivery-zones/{delivery_zone}/toggle', [AdminDeliveryZoneController::class, 'toggle'])->name('delivery-zones.toggle');
     Route::resource('guide-categories', AdminGuideCategoryController::class)->except('show');
     Route::resource('guides', AdminCareGuideController::class)->except('show');
-});
-
-Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(function () {
-    Route::get('/', [SellerDashboardController::class, 'index'])->name('dashboard');
-
-    Route::resource('products', SellerProductController::class)->except('show');
-    Route::delete('products/images/{image}', [SellerProductController::class, 'destroyImage'])->name('products.images.destroy');
-    Route::patch('products/images/{image}/primary', [SellerProductController::class, 'setPrimary'])->name('products.images.primary');
-
-    Route::get('orders', [SellerOrderController::class, 'index'])->name('orders.index');
-    Route::get('orders/{order}', [SellerOrderController::class, 'show'])->name('orders.show');
-    Route::patch('orders/{order}/status', [SellerOrderController::class, 'updateStatus'])->name('orders.status');
 });
