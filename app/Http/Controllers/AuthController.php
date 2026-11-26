@@ -22,23 +22,16 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            return redirect()->route(match (Auth::user()->role) {
-                'admin'  => 'admin.dashboard',
-                'seller' => 'seller.dashboard',
-                default  => 'customer.home',
-            });
+        if (!Auth::attempt($credentials)) {
+            return back()->withErrors([
+                'email' => 'Email atau password salah.',
+            ])->onlyInput('email');
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
-    }
-
+        // Regenerasi session setelah login berhasil.
         $request->session()->regenerate();
 
+        // Redirect berdasarkan role pengguna.
         return match (Auth::user()->role) {
             'admin' => redirect()->route('admin.dashboard'),
             'seller' => redirect()->route('seller.dashboard'),
@@ -81,16 +74,18 @@ class AuthController extends Controller
             'role' => 'customer',
         ]);
 
-        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login.');
+        return redirect()->route('login')
+            ->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
     private function rejectUnsupportedRole(Request $request): RedirectResponse
     {
         Auth::logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return back()->withErrors([
+        return redirect()->route('login')->withErrors([
             'email' => 'Akun ini belum memiliki akses.',
         ])->onlyInput('email');
     }
