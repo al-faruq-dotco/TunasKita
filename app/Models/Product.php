@@ -53,20 +53,11 @@ class Product extends Model
             ->orderBy('id');
     }
 
-    // URL thumbnail produk.
+    // URL thumbnail produk. Memakai relasi primaryImage (tidak ada query tambahan
+    // jika sudah di-eager-load) dan jatuh ke placeholder bila produk belum punya gambar.
     public function getThumbnailUrlAttribute(): string
     {
-        $image = $this->images()
-            ->where('is_primary', true)
-            ->first() ?? $this->images()->first();
-
-        if (!$image) {
-            return 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=800&q=80';
-        }
-
-        return str_starts_with($image->image_path, 'http')
-            ? $image->image_path
-            : asset($image->image_path);
+        return $this->primaryImage?->url ?? asset(self::PLACEHOLDER_IMAGE);
     }
 
     // Mengecek apakah produk bisa dibeli.

@@ -45,7 +45,9 @@ class CartController extends Controller
         abort_unless($row->product->isAvailableForPurchase(), 422, 'Produk tidak lagi tersedia.');
         if ($data['quantity'] > $row->product->stock) {
             return back()->withErrors(['quantity' => 'Jumlah melebihi stok.']);
-        }$row->update($data);
+        }
+
+        $row->update($data);
 
         return back()->with('success', 'Keranjang diperbarui.');
     }

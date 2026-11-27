@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Gambar produk belum tersedia">
+  <rect width="800" height="600" fill="#edf1e5"/>
+  <g fill="none" stroke="#315d40" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity=".55">
+    <path d="M400 400V270"/>
+    <path d="M400 300c-60 0-100-35-105-95 60 0 100 35 105 95z"/>
+    <path d="M400 270c60 0 100-35 105-95-60 0-100 35-105 95z"/>
+    <path d="M330 400h140"/>
+  </g>
+  <text x="400" y="470" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="600" fill="#718071">Foto belum tersedia</text>
+</svg>

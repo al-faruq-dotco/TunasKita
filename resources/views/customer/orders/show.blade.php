@@ -1,9 +1,19 @@
 @extends('customer.layouts.app')
 @section('title', 'Detail Pesanan')
 @section('content')
+    @php
+        $statusLabel = [
+            'pending' => 'Menunggu',
+            'confirmed' => 'Dikonfirmasi',
+            'processing' => 'Diproses',
+            'shipped' => 'Dikirim',
+            'completed' => 'Selesai',
+            'cancelled' => 'Dibatalkan',
+        ];
+    @endphp
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-3xl font-bold text-[#244d35]">Detail Pesanan</h1>
-        <span class="rounded-full bg-green-100 px-4 py-2 text-green-800">{{ ucfirst($order->status) }}</span>
+        <span class="rounded-full bg-green-100 px-4 py-2 text-green-800">{{ $statusLabel[$order->status] ?? ucfirst($order->status) }}</span>
     </div>
     <div class="grid gap-5 md:grid-cols-3">
         <section class="rounded-3xl border border-green-100 bg-white p-5 md:col-span-2">
